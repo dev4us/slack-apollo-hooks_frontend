@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { graphql, compose } from "react-apollo";
 import styled from "styled-components";
 import gql from "graphql-tag";
@@ -43,8 +43,33 @@ const CHANNELS_QUERY = gql`
   }
 `;
 
+const CHANNELS_SUBSCRIPTION = gql`
+  subscription CreateChannelSubscription {
+    CreateChannelSubscription {
+      channelName
+    }
+  }
+`;
+
 const ChannelList = ({ getChannelQuery }) => {
-  console.log(getChannelQuery);
+  const subscribeToNewChannel = () => {
+    getChannelQuery.subscribeToMore({
+      document: CHANNELS_SUBSCRIPTION,
+      updateQuery: (prevData, { subscriptionData }) => {
+        return {
+          GetChannel: {
+            channels: [
+              ...prevData.GetChannel.channels,
+              subscriptionData.data.CreateChannelSubscription
+            ],
+            __typename: prevData.GetChannel.__typename
+          }
+        };
+      }
+    });
+  };
+
+  useEffect(() => subscribeToNewChannel(), []);
 
   return (
     <>
