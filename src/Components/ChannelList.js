@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { graphql, compose } from "react-apollo";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import gql from "graphql-tag";
 
 const LeftMenuFrame = styled.div`
@@ -28,15 +28,23 @@ const SubTitle = styled.div`
 const Channel = styled.div`
   width: 100%;
   height: 30px;
-  color: #dcdcdc;
+  color: #8e8d8d;
   font-size: 15px;
   cursor: pointer;
+  ${props =>
+    props.isActive &&
+    css`
+      color: white;
+      font-weight: bold;
+      cursor: context-menu;
+    `}
 `;
 
 const CHANNELS_QUERY = gql`
   query {
     GetChannel {
       channels {
+        id
         channelName
       }
     }
@@ -46,12 +54,13 @@ const CHANNELS_QUERY = gql`
 const CHANNELS_SUBSCRIPTION = gql`
   subscription CreateChannelSubscription {
     CreateChannelSubscription {
+      id
       channelName
     }
   }
 `;
 
-const ChannelList = ({ getChannelQuery }) => {
+const ChannelList = ({ getChannelQuery, store, setStore }) => {
   const subscribeToNewChannel = () => {
     getChannelQuery.subscribeToMore({
       document: CHANNELS_SUBSCRIPTION,
@@ -69,7 +78,16 @@ const ChannelList = ({ getChannelQuery }) => {
     });
   };
 
-  useEffect(() => subscribeToNewChannel(), []);
+  useEffect(() => {
+    subscribeToNewChannel();
+  }, []);
+
+  const switchChannel = id => {
+    setStore({
+      ...store,
+      selectedChannelId: id
+    });
+  };
 
   return (
     <>
@@ -78,7 +96,13 @@ const ChannelList = ({ getChannelQuery }) => {
         <SubTitle>Channel</SubTitle>
         {!getChannelQuery.loading &&
           getChannelQuery.GetChannel.channels.map((channel, index) => (
-            <Channel key={index}># {channel.channelName}</Channel>
+            <Channel
+              key={index}
+              isActive={channel.id === store.selectedChannelId}
+              onClick={() => switchChannel(channel.id)}
+            >
+              # {channel.channelName}
+            </Channel>
           ))}
       </LeftMenuFrame>
     </>
