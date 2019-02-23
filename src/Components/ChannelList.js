@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
+import { Store } from "../GlobalState/store";
 import { graphql, compose } from "react-apollo";
 import styled, { css } from "styled-components";
 import gql from "graphql-tag";
@@ -60,7 +61,9 @@ const CHANNELS_SUBSCRIPTION = gql`
   }
 `;
 
-const ChannelList = ({ getChannelQuery, store, setStore }) => {
+const ChannelList = ({ getChannelQuery }) => {
+  const { state, dispatch } = useContext(Store);
+
   const subscribeToNewChannel = () => {
     getChannelQuery.subscribeToMore({
       document: CHANNELS_SUBSCRIPTION,
@@ -83,9 +86,9 @@ const ChannelList = ({ getChannelQuery, store, setStore }) => {
   }, []);
 
   const switchChannel = id => {
-    setStore({
-      ...store,
-      selectedChannelId: id
+    dispatch({
+      type: "SWITCHING_CHANNEL",
+      payload: id
     });
   };
 
@@ -98,7 +101,7 @@ const ChannelList = ({ getChannelQuery, store, setStore }) => {
           getChannelQuery.GetChannel.channels.map((channel, index) => (
             <Channel
               key={index}
-              isActive={channel.id === store.selectedChannelId}
+              isActive={channel.id === state.selectedChannelId}
               onClick={() => switchChannel(channel.id)}
             >
               # {channel.channelName}
