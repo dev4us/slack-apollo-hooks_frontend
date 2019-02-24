@@ -1,8 +1,8 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { Store } from "../GlobalState/store";
-import { graphql, compose } from "react-apollo";
+import { useQuery, useSubscription } from "react-apollo-hooks";
+import { CHANNELS_QUERY, CHANNELS_SUBSCRIPTION } from "./Queries";
 import styled, { css } from "styled-components";
-import gql from "graphql-tag";
 
 const LeftMenuFrame = styled.div`
   padding: 15px 15px 15px 15px;
@@ -41,64 +41,49 @@ const Channel = styled.div`
     `}
 `;
 
-const CHANNELS_QUERY = gql`
-  query {
-    GetChannel {
-      channels {
-        id
-        channelName
-      }
-    }
-  }
-`;
-
-const CHANNELS_SUBSCRIPTION = gql`
-  subscription CreateChannelSubscription {
-    CreateChannelSubscription {
-      id
-      channelName
-    }
-  }
-`;
-
-const ChannelList = ({ getChannelQuery }) => {
+const LeftPannel = () => {
   const { state, dispatch } = useContext(Store);
-
-  const subscribeToNewChannel = () => {
-    getChannelQuery.subscribeToMore({
-      document: CHANNELS_SUBSCRIPTION,
-      updateQuery: (prevData, { subscriptionData }) => {
-        return {
-          GetChannel: {
-            channels: [
-              ...prevData.GetChannel.channels,
-              subscriptionData.data.CreateChannelSubscription
-            ],
-            __typename: prevData.GetChannel.__typename
-          }
-        };
-      }
-    });
-  };
-
-  useEffect(() => {
-    subscribeToNewChannel();
-  }, []);
+  const { data } = useQuery(CHANNELS_QUERY);
 
   const switchChannel = id => {
     dispatch({
-      type: "SWITCHING_CHANNEL",
+      type: "SET_VALUE",
+      target: "selectedChannelId",
       payload: id
     });
   };
+
+  useSubscription(CHANNELS_SUBSCRIPTION, {
+    onSubscriptionData: ({
+      client,
+      subscriptionData: {
+        data: { CreateChannelSubscription }
+      }
+    }) => {
+      try {
+        let channels = client.readQuery({ query: CHANNELS_QUERY }).GetChannel
+          .channels;
+
+        channels.push(CreateChannelSubscription);
+
+        client.writeQuery({
+          query: CHANNELS_QUERY,
+          data: {
+            channels
+          }
+        });
+      } catch (e) {}
+    }
+  });
 
   return (
     <>
       <LeftMenuFrame>
         <Title>Slack-Apollo-hooks</Title>
         <SubTitle>Channel</SubTitle>
-        {!getChannelQuery.loading &&
-          getChannelQuery.GetChannel.channels.map((channel, index) => (
+        {data.GetChannel &&
+          data.GetChannel.ok &&
+          data.GetChannel.channels.map((channel, index) => (
             <Channel
               key={index}
               isActive={channel.id === state.selectedChannelId}
@@ -112,6 +97,4 @@ const ChannelList = ({ getChannelQuery }) => {
   );
 };
 
-export default compose(graphql(CHANNELS_QUERY, { name: "getChannelQuery" }))(
-  ChannelList
-);
+export default LeftPannel;
