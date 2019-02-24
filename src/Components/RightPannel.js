@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Store } from "../GlobalState/store";
-import { graphql, compose } from "react-apollo";
+import { useMutation } from "react-apollo-hooks";
 import { SEND_MESSAGE } from "./Queries";
 import styled from "styled-components";
 
@@ -31,16 +31,17 @@ const RightPannel = ({ sendMessage }) => {
   const [nickname, setNickname] = useState("");
   const [message, setMessage] = useState("");
 
-  const sendChat = async () => {
-    await sendMessage({
-      variables: {
-        nickname,
-        contents: message,
-        innerChannelId: state.selectedChannelId
-      }
-    });
-    setMessage("");
-  };
+  const sendChat = useMutation(SEND_MESSAGE, {
+    variables: {
+      nickname,
+      contents: message,
+      innerChannelId: state.selectedChannelId
+    },
+    update: (proxy, mutationResult) => {
+      setMessage("");
+    }
+  });
+
   return (
     <Container>
       <ChatListFrame>
@@ -57,12 +58,10 @@ const RightPannel = ({ sendMessage }) => {
           value={message}
           onChange={e => setMessage(e.target.value)}
         />
-        <SendMessage onClick={() => sendChat()}>SEND MESSAGE</SendMessage>
+        <SendMessage onClick={sendChat}>SEND MESSAGE</SendMessage>
       </ChatInputFrame>
     </Container>
   );
 };
 
-export default compose(graphql(SEND_MESSAGE, { name: "sendMessage" }))(
-  RightPannel
-);
+export default RightPannel;
