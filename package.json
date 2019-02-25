@@ -8,6 +8,7 @@
     "apollo-link": "^1.2.8",
     "apollo-link-http": "^1.5.11",
     "apollo-link-ws": "^1.0.14",
+    "faker": "^4.1.0",
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
     "react": "^16.8.3",

@@ -1,8 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef } from "react";
 import { Store } from "../GlobalState/store";
 import { useMutation } from "react-apollo-hooks";
 import { SEND_MESSAGE } from "./Queries";
 import styled from "styled-components";
+
+import faker from "faker";
 
 import Chats from "./Chats";
 
@@ -28,8 +30,9 @@ const SendMessage = styled.button``;
 
 const RightPannel = ({ sendMessage }) => {
   const { state } = useContext(Store);
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(faker.name.findName());
   const [message, setMessage] = useState("");
+  const inputChat = useRef();
 
   const sendChat = useMutation(SEND_MESSAGE, {
     variables: {
@@ -39,6 +42,7 @@ const RightPannel = ({ sendMessage }) => {
     },
     update: (proxy, mutationResult) => {
       setMessage("");
+      inputChat.current.focus();
     }
   });
 
@@ -54,6 +58,7 @@ const RightPannel = ({ sendMessage }) => {
           onChange={e => setNickname(e.target.value)}
         />
         <InputChat
+          ref={inputChat}
           placeholder="input your message"
           value={message}
           onChange={e => setMessage(e.target.value)}

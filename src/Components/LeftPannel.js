@@ -43,7 +43,7 @@ const Channel = styled.div`
 
 const LeftPannel = () => {
   const { state, dispatch } = useContext(Store);
-  const { data } = useQuery(CHANNELS_QUERY);
+  const { data, loading } = useQuery(CHANNELS_QUERY);
 
   const switchChannel = id => {
     dispatch({
@@ -75,12 +75,12 @@ const LeftPannel = () => {
       } catch (e) {}
     }
   });
-
   return (
     <>
       <LeftMenuFrame>
         <Title>Slack-Apollo-hooks</Title>
         <SubTitle>Channel</SubTitle>
+        {loading && <Channel>loading...</Channel>}
         {data.GetChannel &&
           data.GetChannel.ok &&
           data.GetChannel.channels.map((channel, index) => (

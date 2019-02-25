@@ -14,8 +14,6 @@ const Chats = ({ innerChannelId }) => {
         data: { CreateMessageSubscription }
       }
     }) => {
-      console.log(CreateMessageSubscription);
-      console.log(client);
       try {
         let messages = client.readQuery({
           query: GET_MESSAGES,
@@ -37,13 +35,22 @@ const Chats = ({ innerChannelId }) => {
     }
   });
 
+  const TimeConverter = timestamp => {
+    if (!timestamp) {
+      return;
+    }
+    let timestamp_date = new Date(parseInt(timestamp));
+    return timestamp_date.toLocaleString();
+  };
+
   return (
     <div>
       {data.GetMessage &&
         data.GetMessage.ok &&
         data.GetMessage.messages.map((message, index) => (
           <div key={index}>
-            {message.nickname}: {message.contents} ({message.createdAt})
+            {message.nickname}: {message.contents}
+            <span>{TimeConverter(message.createdAt)}</span>
           </div>
         ))}
     </div>
