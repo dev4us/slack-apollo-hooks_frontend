@@ -9,7 +9,7 @@ Development low level cloning from 'Slack' with Sexy stack
 🤔 I don't know what is License It's all yours
 (Not include Modules😉)
 
-## 👊 Let's do this (only Backend)
+## 👊 Let's do this (only Frontend)
 
 ### Ready
 
