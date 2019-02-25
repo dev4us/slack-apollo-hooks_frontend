@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef } from "react";
 import { Store } from "../GlobalState/store";
 import { useMutation } from "react-apollo-hooks";
 import { SEND_MESSAGE } from "./Queries";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import faker from "faker";
 
@@ -21,19 +21,55 @@ const ChatListFrame = styled.div`
 `;
 
 const ChatInputFrame = styled.div`
-  height: 35px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 15px;
+  padding-right: 15px;
+  height: 60px;
 `;
 
-const InputNickname = styled.input``;
-const InputChat = styled.input``;
-const SendMessage = styled.button``;
+const InputData = styled.input`
+  border: 2px solid black;
+  padding-left: 30px;
+  height: 38px;
+  ${props =>
+    props.inputId === "nickname" &&
+    css`
+      width: 12%;
+      border-right: none;
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+    `}
+  ${props =>
+    props.inputId === "chat" &&
+    css`
+      width: 76%;
+    `}
+`;
+const SendMessage = styled.button`
+  width: 11%;
+  height: 38px;
+  background: #4d394b;
+  color: white;
+  font-size: 12px;
+  border: none;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  cursor: pointer;
+`;
 
-const RightPannel = ({ sendMessage }) => {
+const RightPannel = () => {
   const { state } = useContext(Store);
   const [nickname, setNickname] = useState(faker.name.findName());
   const [message, setMessage] = useState("");
   const inputChat = useRef();
 
+  const setMessageByKey = e => {
+    if (e.key === "Enter") {
+      sendChat();
+    }
+  };
   const sendChat = useMutation(SEND_MESSAGE, {
     variables: {
       nickname,
@@ -52,18 +88,21 @@ const RightPannel = ({ sendMessage }) => {
         <Chats innerChannelId={state.selectedChannelId} />
       </ChatListFrame>
       <ChatInputFrame>
-        <InputNickname
+        <InputData
+          inputId="nickname"
           placeholder="your nickname"
           value={nickname}
           onChange={e => setNickname(e.target.value)}
         />
-        <InputChat
+        <InputData
+          inputId="chat"
           ref={inputChat}
           placeholder="input your message"
           value={message}
           onChange={e => setMessage(e.target.value)}
+          onKeyPress={e => setMessageByKey(e)}
         />
-        <SendMessage onClick={sendChat}>SEND MESSAGE</SendMessage>
+        <SendMessage onClick={sendChat}>Send Message</SendMessage>
       </ChatInputFrame>
     </Container>
   );
