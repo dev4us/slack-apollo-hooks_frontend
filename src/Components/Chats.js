@@ -2,7 +2,6 @@ import React from "react";
 import { useQuery, useSubscription } from "react-apollo-hooks";
 import { GET_MESSAGES, MESSAGE_SUBSCRIPTION } from "./Queries";
 import styled from "styled-components";
-import moment from "moment-timezone";
 
 const ChatRow = styled.div`
   display: flex;
@@ -38,6 +37,10 @@ const DateTime = styled.div`
 const ProfileFrame = styled.div`
   display: flex;
   flex-direction: row;
+`;
+const Message = styled.a`
+  font-size: 14px;
+  margin-top: 2px;
 `;
 
 const Chats = ({ innerChannelId }) => {
@@ -77,11 +80,8 @@ const Chats = ({ innerChannelId }) => {
     if (!timestamp) {
       return;
     }
-    //let timestamp_date = new Date(parseInt(timestamp));
-    //return timestamp_date.toLocaleString();
-    return moment(parseInt(timestamp))
-      .utcOffset(360)
-      .format("YYYY-MM-DD HH:mm");
+    let timestamp_date = new Date(parseInt(timestamp));
+    return timestamp_date.toLocaleString();
   };
 
   return (
@@ -96,7 +96,7 @@ const Chats = ({ innerChannelId }) => {
                 <Nickname>{message.nickname}</Nickname>
                 <DateTime>{TimeConverter(message.createdAt)}</DateTime>
               </ProfileFrame>
-              {message.contents}
+              <Message>{message.contents}</Message>
             </MessageFrame>
           </ChatRow>
         ))}

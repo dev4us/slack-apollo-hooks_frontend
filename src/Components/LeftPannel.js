@@ -1,10 +1,15 @@
-import React, { useContext } from "react";
+import React, { useState, useContext } from "react";
 import { Store } from "../GlobalState/store";
-import { useQuery, useSubscription } from "react-apollo-hooks";
-import { CHANNELS_QUERY, CHANNELS_SUBSCRIPTION } from "./Queries";
+import { useQuery, useMutation, useSubscription } from "react-apollo-hooks";
+import {
+  CHANNELS_QUERY,
+  CREATE_CHANNEL,
+  CHANNELS_SUBSCRIPTION
+} from "./Queries";
 import styled, { css } from "styled-components";
 
 const LeftMenuFrame = styled.div`
+  position: relative;
   padding: 15px 15px 15px 15px;
   width: 250px;
   height: 100%;
@@ -41,9 +46,40 @@ const Channel = styled.div`
     `}
 `;
 
+const CreateChannelFrame = styled.div`
+  display: flex;
+  position: absolute;
+  width: 85%;
+  height: 35px;
+  bottom: 10px;
+`;
+
+const CreateChannelInput = styled.input`
+  flex: 1;
+  height: 100%;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border: 1px solid #dcdcdc;
+  padding-left: 15px;
+`;
+const CreateChannelBtn = styled.button`
+  width: 17%;
+  height: 100%;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+
+  &:hover {
+    background: #a9a7a7;
+  }
+`;
+
 const LeftPannel = () => {
   const { state, dispatch } = useContext(Store);
   const { data, loading } = useQuery(CHANNELS_QUERY);
+  const [createChannelName, setCreateChannelName] = useState("");
 
   const switchChannel = id => {
     dispatch({
@@ -75,6 +111,21 @@ const LeftPannel = () => {
       } catch (e) {}
     }
   });
+
+  const createChannel = useMutation(CREATE_CHANNEL, {
+    variables: {
+      channelName: createChannelName
+    },
+    update: (proxy, mutationResult) => {
+      setCreateChannelName("");
+    }
+  });
+
+  const onAddChannel = e => {
+    if (e.key === "Enter") {
+      createChannel();
+    }
+  };
   return (
     <>
       <LeftMenuFrame>
@@ -92,6 +143,15 @@ const LeftPannel = () => {
               # {channel.channelName}
             </Channel>
           ))}
+        <CreateChannelFrame>
+          <CreateChannelInput
+            placeholder="Create Channel"
+            value={createChannelName}
+            onChange={e => setCreateChannelName(e.target.value)}
+            onKeyPress={e => onAddChannel(e)}
+          />
+          <CreateChannelBtn onClick={createChannel}>+</CreateChannelBtn>
+        </CreateChannelFrame>
       </LeftMenuFrame>
     </>
   );

@@ -30,7 +30,7 @@ const ChatInputFrame = styled.div`
 `;
 
 const InputData = styled.input`
-  border: 2px solid black;
+  border: none;
   padding-left: 30px;
   height: 38px;
   ${props =>
@@ -40,6 +40,7 @@ const InputData = styled.input`
       border-right: none;
       border-top-left-radius: 5px;
       border-bottom-left-radius: 5px;
+      border-right: 1px solid #dcdcdc;
     `}
   ${props =>
     props.inputId === "chat" &&
@@ -54,9 +55,10 @@ const SendMessage = styled.button`
   color: white;
   font-size: 12px;
   border: none;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
   cursor: pointer;
+  &:hover {
+    background: #40223d;
+  }
 `;
 
 const RightPannel = () => {
